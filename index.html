@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-Hant"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>品管題庫刷題工具｜ch02＋ch05</title>
+<style>
+body{font-family:"Microsoft JhengHei",sans-serif;background:#f1f5f9;margin:0;padding:20px;color:#111;line-height:1.8}
+.wrap{max-width:760px;margin:0 auto}
+.banner{background:#0f766e;color:#fff;border-radius:12px;padding:18px 24px;margin-bottom:16px}
+.banner h1{margin:0 0 4px;font-size:24px}.banner p{margin:0;color:#99f6e4;font-size:14px}
+.menu button{display:block;width:100%;padding:16px;margin:10px 0;font-size:18px;border:none;border-radius:10px;background:#0f766e;color:#fff;cursor:pointer;font-family:inherit}
+.menu button:hover{background:#115e59}
+.menu button.alt{background:#7c3aed}.menu button.alt:hover{background:#6d28d9}
+.progress{background:#e2e8f0;border-radius:8px;padding:10px 16px;margin-bottom:12px;font-size:15px;display:flex;justify-content:space-between}
+.card{background:#fff;border:2px solid #0f766e;border-radius:12px;padding:18px 24px}
+.chip{display:inline-block;background:#ccfbf1;color:#0f766e;border-radius:6px;padding:2px 10px;font-size:13px;margin-right:6px}
+.qen{font-style:italic;font-size:17px;margin:8px 0}
+.qtrans{background:#fff7ed;border-radius:8px;padding:8px 14px;margin:8px 0;font-size:15px}
+.opts button{display:block;width:100%;text-align:left;padding:12px 16px;margin:8px 0;font-size:16px;border:1.5px solid #cbd5e1;border-radius:8px;background:#fff;cursor:pointer;font-family:inherit}
+.opts button:hover{background:#f0fdfa}
+.opts button.correct{background:#ecfdf5;border-color:#10b981;font-weight:bold}
+.opts button.wrong{background:#fef2f2;border-color:#f87171}
+.opts button:disabled{cursor:default;opacity:.85}
+.why{background:#fff;border:1px dashed #94a3b8;border-radius:8px;padding:10px 16px;margin:10px 0}
+.nextbtn{width:100%;padding:14px;font-size:17px;border:none;border-radius:10px;background:#0f766e;color:#fff;cursor:pointer;font-family:inherit;margin-top:10px}
+.hidden{display:none}
+.summary{background:#fff;border:2px solid #0f766e;border-radius:12px;padding:20px 26px}
+.summary h2{margin:0 0 10px;color:#0f766e}
+.bigscore{font-size:42px;font-weight:900;text-align:center;margin:12px 0;color:#0f766e}
+.wrongitem{background:#fef2f2;border:1px solid #f87171;border-radius:8px;padding:10px 16px;margin:8px 0;font-size:15px}
+.wrongitem .c{color:#047857;font-weight:bold}
+.menu2 button{padding:12px 18px;margin:6px;font-size:15px;border:none;border-radius:8px;background:#0f766e;color:#fff;cursor:pointer;font-family:inherit}
+.menu2{display:flex;flex-wrap:wrap;justify-content:center}
+sub{font-size:.72em}
+.mini2{padding:4px 12px;font-size:13px;border:none;border-radius:6px;background:#94a3b8;color:#fff;cursor:pointer;font-family:inherit;margin:2px 0}
+.mini2:hover{background:#64748b}
+.mini{padding:3px 10px;font-size:13px;border:none;border-radius:6px;background:#64748b;color:#fff;cursor:pointer;font-family:inherit}
+.mini.exit{background:#334155}
+</style></head><body><div class="wrap">
+<div class="banner"><h1>品管題庫刷題工具</h1>
+<p>ch02（27 題）＋ ch05（23 題）＝ 50 題｜每次開始自動洗牌（題目＋選項順序都換）｜<b>工具版本 v4（2026-11-14 修正 ch02-22 正解標示）</b>｜點選項即時判分＋顯示說明｜結束可重做錯題｜資料來源：i-learning 題庫測驗卷（2026-11-14 抓取）</p></div>
+
+<div id="menu" class="menu card">
+  <h2 style="margin:0 0 12px;color:#0f766e">選擇刷題模式</h2>
+  <button onclick="start('ch02')">ch02 題庫（27 題｜品管大師・PDCA・5S・8D・防呆）</button>
+  <button onclick="start('ch05')">ch05 題庫（23 題｜統計概念・分配・假設檢定）</button>
+  <button class="alt" onclick="start('all')">全部混合（50 題洗牌大挑戰）</button>
+</div>
+
+<div id="quiz" class="hidden">
+  <div class="progress"><span id="prog"></span>
+    <span style="display:flex;gap:8px;align-items:center"><span id="score"></span>
+    <button class="mini" onclick="earlyEnd()">⏹ 提前結算</button>
+    <button class="mini exit" onclick="backMenu()">✕ 退出</button></span></div>
+  <div class="card">
+    <div><span class="chip" id="chip"></span></div>
+    <div class="qen" id="qen"></div>
+    <button id="transbtn" class="mini2" onclick="toggleTrans()">👁 顯示中文</button>
+    <div class="qtrans" id="qtrans"></div>
+    <div class="opts" id="opts"></div>
+    <div id="whybox" class="why hidden"></div>
+    <button id="next" class="nextbtn hidden" onclick="nextQ()">下一題 →</button>
+  </div>
+</div>
+
+<div id="endbox" class="hidden">
+  <div class="summary">
+    <h2>📊 結算</h2>
+    <div class="bigscore" id="finalscore"></div>
+    <p id="finalmsg" style="text-align:center"></p>
+    <h3 style="color:#0f766e">❌ 錯題清單（點「重做錯題」再練）</h3>
+    <div id="wronglist"></div>
+    <div class="menu2">
+      <button onclick="redoWrong()">🔁 只重做錯題</button>
+      <button onclick="start(curMode)">🔀 重新洗牌再來一次</button>
+      <button onclick="backMenu()">回到模式選擇</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const DATA = [{"q": "According to Deming and Juran, what is the primary issue with quality?", "t": "根據 Deming 與 Juran，品質的主要問題是什麼？", "opts": ["Lack of a dedicated inspection department", "Absence of production quotas", "Management not designing and improving processes", "Overreliance on statistical analysis tools."], "ci": 2, "why": "Deming 與 Juran 都認為<b>品質問題的根源在管理階層</b>（Deming：約 85% 的問題來自系統與管理）。管理階層必須設計並持續改善製程，檢驗部門、統計工具都只是輔助。", "ch": "ch02"}, {"q": "Who introduced the concept of \"Total Quality Control (TQC)\"?", "t": "誰提出「全面品質管制（TQC）」的概念？", "opts": ["Ishikawa", "Juran", "Crosby", "Feigenbaum."], "ci": 3, "why": "<b>Feigenbaum（費根堡姆）</b>提出 Total Quality Control——品質是全公司所有人的責任，不是只靠檢驗或品管部門。（Ch1 演進：SQC → TQC → TQM）", "ch": "ch02"}, {"q": "Who is known as the \"Father of Quality Circles\"?", "t": "誰被稱為「品管圈之父」？", "opts": ["Juran", "Ishikawa", "Crosby", "Deming."], "ci": 1, "why": "<b>Ishikawa（石川馨）</b>推動現場人員自發組成的小圈圈改善活動（品管圈），同時也是<b>特性要因圖（魚骨圖）</b>的提出者。", "ch": "ch02"}, {"q": "Who is referred to as the \"God of Quality\" by the Japanese?", "t": "誰被日本人稱為「品質之神」？", "opts": ["Ishikawa", "Juran", "Crosby", "Deming."], "ci": 3, "why": "<b>Deming（戴明）</b>：戰後協助日本重建品質（統計方法、PDCA），JUSE 於 1951 年設立<b>戴明獎</b>，日本人尊稱「品質之神」。", "ch": "ch02"}, {"q": "Who proposed the \"Four Absolutes of Quality Management\"?", "t": "誰提出「品質管理四大絕對原則」？", "opts": ["Ishikawa", "Juran", "Crosby", "Feigenbaum."], "ci": 2, "why": "<b>Crosby（克勞斯比）</b>四大絕對原則：①品質＝符合要求 ②品質來自預防 ③績效標準＝零缺陷 ④品質成本＝不符合要求的代價。", "ch": "ch02"}, {"q": "Who proposed the \"Quality Management Maturity Grid\"?", "t": "誰提出「品質管理成熟度網格」？", "opts": ["Deming", "Juran", "Crosby", "Taguchi."], "ci": 2, "why": "<b>Crosby</b> 的成熟度網格五階段：不確定期 → 覺醒期 → 啟蒙期 → 智慧期 → 確定期。", "ch": "ch02"}, {"q": "Who proposed the concept of the \"Spiral of Progress in Quality\"?", "t": "誰提出「品質進步螺旋」的概念？", "opts": ["Ishikawa", "Juran", "Crosby", "Feigenbaum."], "ci": 1, "why": "<b>Juran（朱蘭）</b>的品質進步螺旋：一圈圈上升，<b>螺旋軸心是管理階層</b>。", "ch": "ch02"}, {"q": "Whose quality philosophy includes the \"Quality Trilogy\"?", "t": "誰的品管哲學包含「品質三部曲」？", "opts": ["Deming", "Juran", "Crosby", "Shewhart."], "ci": 1, "why": "<b>Juran</b> 品質三部曲＝品質規劃 → 品質管制 → 品質改善。", "ch": "ch02"}, {"q": "In the FOCUS-PDCA management cycle, what does the \"S\" represent?", "t": "FOCUS-PDCA 管理循環中，「S」代表什麼？", "opts": ["Study", "Select improvement projects", "Standardize", "Sort."], "ci": 1, "why": "FOCUS-PDCA＝<b>F</b>ind、<b>O</b>rganize、<b>C</b>larify、<b>U</b>nderstand、<b>S</b>elect（選擇改善專案）＋PDCA。S＝選擇改善專案。", "ch": "ch02"}, {"q": "In the FOCUS-PDCA management cycle, what does the first \"C\" stand for?", "t": "FOCUS-PDCA 管理循環中，第一個「C」代表什麼？", "opts": ["Study", "Check", "Clarify", "Choose."], "ci": 2, "why": "第一個 C＝<b>Clarify（瞭解/澄清現況）</b>：確認目前流程怎麼運作。", "ch": "ch02"}, {"q": "In the PDCA management cycle, what does the \"A\" stand for?", "t": "PDCA 管理循環中，「A」代表什麼？", "opts": ["Decide on goals", "Standardize", "Measure quality characteristics", "Statistical analysis."], "ci": 1, "why": "PDCA 的 A＝<b>Act（處置）</b>，核心＝將有效改善<b>標準化</b>（納入作業標準）並處理殘留問題。", "ch": "ch02"}, {"q": "In which companies did Dr. Juran serve?", "t": "Juran 博士曾在哪些公司任職？", "opts": ["Western Electric", "Ford", "Martin Marietta", "Xerox."], "ci": 0, "why": "<b>Western Electric（西電）</b>是 Juran 職涯起點——1924 年加入檢驗統計部門（與 Shewhart 共事）；二戰後亦曾任職 Martin Marietta。單選以最經典的 Western Electric 為答案。", "ch": "ch02"}, {"q": "Which activity involves distinguishing between \"necessary\" and \"unnecessary\" items?", "t": "哪個活動涉及區分「必要」與「不必要」的項目？", "opts": ["Sort", "Set in order", "Shine", "Standardize."], "ci": 0, "why": "5S 第一步 <b>Sort（整理）</b>＝區分「要用的」與「不要用的」，清除不必要項目。", "ch": "ch02"}, {"q": "Which company advocated the 8D methodology?", "t": "哪家公司推行 8D 方法？", "opts": ["Sony", "Toyota", "Ford", "Siemens."], "ci": 2, "why": "<b>Ford（福特）</b>發展 8D（Eight Disciplines）：組團隊→描述問題→圍堵→根本原因→對策→實施→預防→肯定團隊。", "ch": "ch02"}, {"q": "Which concept was proposed by Juran?", "t": "哪個概念是 Juran 提出的？", "opts": ["Breakthrough Sequence Model", "Quality is conformance to requirements", "Tearless Quality", "Six Sigma."], "ci": 0, "why": "<b>Juran</b> 的代表概念：管理突破（Breakthrough 序列）、品質三部曲、品質進步螺旋、關鍵少數（80/20）。「Quality is conformance to requirements」是 Crosby 的定義；Six Sigma 由 Motorola 提出。", "ch": "ch02"}, {"q": "Which item is not associated with Ishikawa?", "t": "哪一項與 Ishikawa 無關？", "opts": ["Cause and Effect Diagram", "Fishbone Diagram", "Quality Circles", "Seven Deadly Diseases."], "ci": 3, "why": "特性要因圖＝魚骨圖＝品管圈都是 <b>Ishikawa</b> 的貢獻；<b>「七大惡疾（Seven Deadly Diseases）」是 Deming</b> 提出的。", "ch": "ch02"}, {"q": "Which item is not included in the 5S methodology?", "t": "哪一項不包含在 5S 中？", "opts": ["Sort", "Set in order", "Shine", "Safety."], "ci": 3, "why": "經典 5S＝Sort 整理、Set in order 整頓、Shine 清掃、Standardize 標準化、Sustain 紀律。<b>Safety 安全</b>是延伸的 6S 概念。", "ch": "ch02"}, {"q": "Which item is not included in the Quality Trilogy?", "t": "哪一項不包含在品質三部曲中？", "opts": ["Quality planning", "Quality improvement", "Quality audit", "Quality control."], "ci": 2, "why": "三部曲＝<b>品質規劃、品質管制、品質改善</b>。「品質稽核（Quality audit）」不在其中。", "ch": "ch02"}, {"q": "Which item is not part of the 8D problem-solving methodology?", "t": "哪一項不是 8D 問題解決法的步驟？", "opts": ["Form a team", "Define the problem", "Root cause analysis", "Audit suppliers."], "ci": 3, "why": "8D：D1 組團隊 → D2 描述問題 → D3 圍堵 → D4 <b>根本原因分析</b> → D5 對策 → D6 實施 → D7 預防再發 → D8 肯定團隊。「稽核供應商」不是 8D 步驟。", "ch": "ch02"}, {"q": "Which of the following is a design principle of Mistake-Proofing?", "t": "下列何者是防呆（Mistake-Proofing）的設計原則？", "opts": ["Elimination", "Prevention", "Simplification", "All of the above."], "ci": 3, "why": "防呆（Poka-yoke）原則涵蓋：<b>消除（Elimination）</b>、<b>預防（Prevention）</b>、<b>簡化（Simplification）</b>——以上皆是。", "ch": "ch02"}, {"q": "Which of the following is not associated with Crosby?", "t": "下列何者與 Crosby 無關？", "opts": ["PDCA", "Quality is Free", "Quality Management Maturity Grid", "Zero Defects Program."], "ci": 0, "why": "<b>PDCA</b> 是蕭華特/戴明循環，與 Crosby 無關。Crosby：Quality is Free、成熟度網格、<b>零缺陷計畫</b>、四大絕對原則。", "ch": "ch02"}, {"q": "Which scholar advocated improving quality through projects?", "t": "哪位學者主張透過「專案」來改善品質？", "opts": ["Shewhart", "Deming", "Crosby", "Juran."], "ci": 3, "why": "<b>Juran</b>：品質改善是<b>逐一專案（project-by-project）</b>推動——選定關鍵少數專案、組團隊突破。", "ch": "ch02"}, {"q": "Which scholar incorporated the \"Platonic Principle\" into the field of quality management?", "t": "哪位學者將「柏拉圖原理」引入品質管理領域？", "opts": ["Crosby", "Juran", "Deming", "Shewhart."], "ci": 1, "why": "柏拉圖原理＝Pareto 原則（<b>關鍵少數、瑣碎多數</b> 80/20）。<b>Juran</b> 將其引入品質管理。", "ch": "ch02"}, {"q": "Which scholar introduced the \"Comprehensive Knowledge System\"?", "t": "誰提出「淵博知識系統」？", "opts": ["Deming", "Juran", "Crosby", "Shewhart."], "ci": 0, "why": "<b>Deming</b> 的淵博知識系統（System of Profound Knowledge）：系統觀點、變異知識、知識理論、心理學。", "ch": "ch02"}, {"q": "Which statement is correct?", "t": "哪一個敘述是正確的？", "opts": ["Deming introduced the concept of TQC.", "Juran introduced the concept of Quality Circles for quality improvement.", "Crosby believed that quality is conformance to requirements.", "The Deming Prize was established by the U.S. government."], "ci": 2, "why": "正確＝<b>Crosby 認為品質＝符合要求</b>。錯誤：TQC 是 Feigenbaum 提出；品管圈是 Ishikawa；戴明獎由<b>日本 JUSE</b> 設立（非美國政府）。", "ch": "ch02"}, {"q": "Who advocated \"Company-Wide Quality Control (CWQC)\"?", "t": "誰主張「全公司品質管制（CWQC）」？", "opts": ["Ishikawa", "Juran", "Crosby", "Shewhart."], "ci": 0, "why": "<b>Ishikawa（石川馨）</b>：品質管制要涵蓋全公司所有部門與全體員工，並普及 QC 七大手法到現場。", "ch": "ch02"}, {"q": "Who advocated measuring quality in terms of the \"Cost of Non-Conformance\"?", "t": "誰主張用「不符合要求的成本」來衡量品質？", "opts": ["Deming", "Juran", "Crosby", "Taguchi."], "ci": 2, "why": "<b>Crosby</b>：品質成本＝不符合要求的代價（重工、報廢、客訴、保固）——用成本語言讓管理者重視品質。", "ch": "ch02"}, {"q": "A certain product has an exponential distribution for its failure time, and the mean time between failures (MTBF = 1/lambda) is 200 hours. What is the probability that the product will last at least 200 hours?", "t": "指數分配失效時間，MTBF＝1/λ＝200 小時，求至少活過 200 小時的機率？", "opts": ["0.63", "0.9", "0.2.", "0.37"], "ci": 3, "why": "存活函數：P(T ≥ t)＝e^(−λt)＝e^(−200/200)＝e^(−1)＝<b>0.368 ≈ 0.37</b>。陷阱：0.63 是「200 小時前失效」的機率。", "ch": "ch05"}, {"q": "Which of the following is not a part of inferential statistics?", "t": "下列何者不屬於推論統計？", "opts": ["ANOVA", "Range", "Regression", "Control chart."], "ci": 1, "why": "<b>全距＝最大值−最小值</b>是<b>敘述統計</b>量。ANOVA、迴歸、管制圖都是由樣本對母體/製程做推論。", "ch": "ch05"}, {"q": "Which of the following is not part of descriptive statistics?", "t": "下列何者不屬於敘述統計？", "opts": ["Variance.", "Mean", "Standard deviation", "2-sample t test"], "ci": 3, "why": "平均數、變異數、標準差是<b>敘述統計</b>量；<b>雙樣本 t 檢定</b>是比較兩母體平均數——屬<b>推論統計</b>。", "ch": "ch05"}, {"q": "Which of the following statistical measures does not utilize the entire dataset?", "t": "下列哪個統計量沒有使用到整組資料？", "opts": ["Range", "Standard deviation", "Mean", "Variance."], "ci": 0, "why": "<b>全距＝最大值−最小值</b>，只用兩個端點。平均數、變異數、標準差都用每一筆資料。", "ch": "ch05"}, {"q": "Assuming the median of a set of data is 15, the first quartile Q1 = 7, and the third quartile Q3 is 20, what is the interquartile range (IQR)?", "t": "中位數＝15、Q1＝7、Q3＝20，求四分位距（IQR）？", "opts": ["8", "13", "3", "13.5."], "ci": 1, "why": "IQR＝Q3−Q1＝20−7＝<b>13</b>。", "ch": "ch05"}, {"q": "For a certain normal distribution with a mean of mu and a standard deviation of 32, if samples of size n = 16 are drawn from this distribution, what is the distribution of the sample means?", "t": "常態分配（μ、σ＝32），n＝16 的樣本平均數分配為何？", "opts": ["Normal distribution, mean = 100, standard deviation = 8", "Normal distribution, mean = 25, standard deviation = 8", "Chi-squared distribution, mean = 100, standard deviation = 8.", "Uniform distribution, mean = 100, standard deviation = 8"], "ci": 0, "why": "中央極限定理：X̄ ～ N(μ, σ²/n)＝N(100, 32²/16)＝<b>N(100, 8²)</b>。標準差 ÷√n：32→8。", "ch": "ch05"}, {"q": "Given a dataset {5, 6, 4, 5, 5}, which of the following is incorrect?", "t": "資料 {5, 6, 4, 5, 5}，何者「不正確」？", "opts": ["Range = 2.", "Median = 4", "Mean = 5", "Mode = 5"], "ci": 1, "why": "排序 4,5,5,5,6：全距＝6−4＝2 ✓、中位數＝<b>5</b>（第 3 筆）✓、平均＝5 ✓、眾數＝5 ✓。<b>「中位數＝4」錯誤</b>——中位數是 5。", "ch": "ch05"}, {"q": "Given a quality characteristic with upper and lower specification limits of USL = 112 and LSL = 88, respectively, and a mean of 100 and a standard deviation of 4, what is the yield?", "t": "USL＝112、LSL＝88、μ＝100、σ＝4，求良率？", "opts": ["99.865%.", "0.27%", "99.73%", "95.44%"], "ci": 2, "why": "規格＝100±12＝100±3σ → 常態 ±3s 內機率＝<b>99.73%</b>（0.27% 落在界外）。", "ch": "ch05"}, {"q": "If a set of normally distributed data has a mean of 15 and a standard deviation of 5, what is the standardized value for the data point \"30\"?", "t": "常態資料 μ＝15、σ＝5，資料點「30」的標準化值？", "opts": ["2.", "5", "6", "3"], "ci": 3, "why": "z＝(30−15)/5＝<b>3</b>。", "ch": "ch05"}, {"q": "If there are 10 multiple-choice questions, and each question is guessed independently, what probability distribution does the number of correct guesses follow?", "t": "10 道獨立猜測選擇題，猜對題數服務何種分配？", "opts": ["Poisson distribution", "Normal distribution.", "Binomial distribution", "Hypergeometric distribution"], "ci": 2, "why": "<b>二項分配（Binomial）</b>：固定 n＝10、成功機率固定、獨立試行 → 猜對題數＝二項（平均 np、變異數 npq）。", "ch": "ch05"}, {"q": "In a 20 m^2 carpet, on average, 2 defective points are found. If a 10 m^2 section of the carpet is inspected, what is the probability of finding exactly 1 defective point?", "t": "20 m² 地毯平均 2 個缺陷點，檢驗 10 m²，恰 1 個缺陷點的機率？", "opts": ["4e^-4", "2e^-2", "0.5e^-0.5.", "e^-1"], "ci": 3, "why": "卜瓦松。10 m² 的 λ＝2×(10/20)＝1 → P(x＝1)＝e^(−1)×1＝<b>e^(−1)</b>。", "ch": "ch05"}, {"q": "In a one-sample proportion test with right-tailed testing, if the assumed proportion is p0, and from a sample of n = 100, you estimate phat = 0.05, what are the values of the test statistic and P-Value for a two-tailed test?", "t": "單一樣本比例檢定（雙尾），p0、n＝100、phat＝0.05，統計量與 P 值？", "opts": ["t = 0, P-Value = 0.5", "t = 0, P-Value = 1.0.", "Z = 0, P-Value = 0.5", "Z = 0, P-Value = 1.0"], "ci": 3, "why": "phat 與 p0 相同 → <b>Z＝0</b>；雙尾 P＝2×P(Z≥0)＝2×0.5＝<b>1.0</b>。比例檢定的統計量是 <b>Z</b>（不是 t）。", "ch": "ch05"}, {"q": "In a one-sample Z-test with right-tailed testing, given mu = 18, xbar = 17.5, sigma = 1, and n = 16, the test result yields a P-Value of 0.02275. If a two-tailed test is used instead, which of the following is correct?", "t": "右尾 Z 檢定 P 值＝0.02275，改雙尾何者正確？", "opts": ["P-Value = 0.02275", "P-Value = 0.0455", "P-Value = 0.9545", "P-Value = 0.97725"], "ci": 1, "why": "雙尾 P 值＝2×單尾＝2×0.02275＝<b>0.0455</b>。", "ch": "ch05"}, {"q": "In a proportion test for non-conformance, with known p = 0.05, p0 = 0.04, and n = 100, what is the value of the test statistic?", "t": "比例檢定：p＝0.05、p0＝0.04、n＝100，求檢定統計量？", "opts": ["1.51", "2.02.", "0.48", "0.51"], "ci": 3, "why": "Z＝(phat−p0)/√(p0(1−p0)/n)＝0.01/0.0196＝<b>0.51</b>。", "ch": "ch05"}, {"q": "In a right-tailed one-sample t-test, the test statistic is t = 2.5, P-Value = 0.01, and the critical value is 1.71. Under the same data conditions, if a left-tailed test is used, which of the following is correct?", "t": "右尾 t 檢定 t＝2.5、P＝0.01、臨界值 1.71，改左尾何者正確？", "opts": ["Critical value = 1.71", "P-Value = 0.99", "t = -2.5", "P-Value = 0.01."], "ci": 1, "why": "左尾：P 值＝P(t ≤ −2.5)＝右尾鏡像＝1−0.01＝<b>0.99</b>；臨界值與統計量方向都相反，結論反轉（右尾拒絕、左尾不拒絕）。", "ch": "ch05"}, {"q": "In a right-tailed one-sample Z-test with a significance level of 0.08, the test statistic is 2, and the critical value is 1.41. Which of the following is correct?", "t": "右尾 Z 檢定 α＝0.08，統計量＝2，臨界值＝1.41，何者正確？", "opts": ["Reject H0", "Accept Ha", "Reject Ha", "Do not reject H0."], "ci": 0, "why": "Z＝2 ＞ 1.41 → 統計量落入拒絕域 → <b>拒絕 H0</b>。", "ch": "ch05"}, {"q": "In hypothesis testing, if one wants to test the variance of a population, which distribution is used?", "t": "想檢定母體的「變異數」，用哪種分配？", "opts": ["t-distribution", "F-distribution", "Chi-squared distribution.", "Normal distribution"], "ci": 2, "why": "<b>χ²（卡方）分配</b>：χ²0＝(n−1)s²/σ0²。比較兩母體變異數用 F；單一母體平均用 t。", "ch": "ch05"}, {"q": "In hypothesis testing, the significance of a test is often determined using the P-value. What value is the P-value calculated based on?", "t": "P 值是根據什麼計算出來的？", "opts": ["Test statistic.", "Type II error", "Critical value", "Type I error"], "ci": 0, "why": "P 值＝根據<b>檢定統計量</b>在其抽樣分配下，算出「更極端結果」的機率。統計量越極端 → P 越小。", "ch": "ch05"}, {"q": "In the theory of control charts, the distribution of the number of defects per unit area is close to which distribution?", "t": "單位面積上的缺陷數分配接近哪種分配？", "opts": ["Hypergeometric distribution", "Normal distribution", "Poisson distribution.", "Binomial distribution"], "ci": 2, "why": "<b>卜瓦松分配（Poisson）</b>：平均＝變異數＝λ——c 管制圖的理論基礎。", "ch": "ch05"}, {"q": "Suppose a certain quality characteristic follows a normal distribution with an upper specification limit (USL) of 136. In which case is the non-conformance rate minimized?", "t": "USL＝136，哪種情況不合格率最小？", "opts": ["N(130, 4)", "N(135, 0.25).", "N(134, 1)", "N(128, 9)"], "ci": 0, "why": "a. z＝(136−130)/2＝3 → 0.00135（<b>最小</b>）；b. z＝2 → 0.02275；c. z＝2 → 0.02275；d. z＝2.67 → 0.00383。<b>平均離 USL 最遠＋變異最小</b>的不合格率最低。", "ch": "ch05"}, {"q": "The 2-sample t test is used to test", "t": "雙樣本 t 檢定在檢定什麼？", "opts": ["the means of two populations", "the variances of two populations.", "the mean of one population", "the standard deviation of one population"], "ci": 0, "why": "雙樣本 t 檢定＝檢定<b>兩個母體的平均數</b>（H0: μ1＝μ2）。變異數比較用 F；單一母體用 t/χ²。", "ch": "ch05"}, {"q": "The average non-conformance rate of a certain product is 0.01. If a sample of n = 100 items is taken, what is the probability of exactly 1 non-conforming item in the sample?", "t": "不合格率 0.01，n＝100，恰好 1 個不合格的機率？", "opts": ["(0.01)^99", "0.01(0.99)^99.", "(0.99)^99", "99(0.99)^99"], "ci": 2, "why": "二項：P(x＝1)＝C(100,1)×0.01×0.99^99＝1×<b>0.99^99</b>≈0.370。", "ch": "ch05"}, {"q": "When measuring the number of defects in a batch of products, which probability distribution is suitable as its probability distribution?", "t": "量測一批產品的「缺陷數」，適合哪種分配？", "opts": ["Hypergeometric distribution.", "Poisson distribution", "Normal distribution", "Binomial distribution"], "ci": 1, "why": "<b>缺陷數（每單位不完美點數）</b>→<b>卜瓦松分配</b>（平均＝變異數＝λ），是 c 管制圖的基礎。「不合格品數」才用二項（np 圖）。", "ch": "ch05"}];
+let curMode = null, pool = [], cur = 0, correctCnt = 0, wrong = [], answerLocked = false;
+let early = false;
+
+function fmt(s){ return s.replace(/([Xx])(\d+)/g, '$1<sub>$2</sub>'); }
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+function start(mode){
+  curMode = mode; early = false;
+  pool = shuffle(DATA.filter(d => mode==='all' || d.ch===mode).map(d => Object.assign({}, d)));
+  wrong = []; cur = 0; correctCnt = 0;
+  document.getElementById('menu').classList.add('hidden');
+  document.getElementById('endbox').classList.add('hidden');
+  document.getElementById('quiz').classList.remove('hidden');
+  showQ();
+}
+function redoWrong(){
+  early = false;
+  pool = shuffle(wrong.map(w => DATA.find(d => d.q === w.q)));
+  wrong = []; cur = 0; correctCnt = 0;
+  document.getElementById('endbox').classList.add('hidden');
+  document.getElementById('quiz').classList.remove('hidden');
+  showQ();
+}
+function backMenu(){
+  document.getElementById('quiz').classList.add('hidden');
+  document.getElementById('endbox').classList.add('hidden');
+  document.getElementById('menu').classList.remove('hidden');
+}
+function toggleTrans(){
+  const q = document.getElementById('qtrans');
+  const b = document.getElementById('transbtn');
+  const hidden = q.classList.toggle('hidden');
+  b.textContent = hidden ? '👁 顯示中文' : '🙈 隱藏中文';
+}
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+function showQ(){
+  answerLocked = false;
+  const d = pool[cur];
+  document.getElementById('prog').textContent = '第 ' + (cur+1) + ' / ' + pool.length + ' 題';
+  document.getElementById('score').textContent = '目前答對 ' + correctCnt + ' 題';
+  document.getElementById('chip').textContent = d.ch === 'ch02' ? 'ch02 品管大師與哲學' : 'ch05 統計概念與檢定';
+  document.getElementById('qen').innerHTML = fmt(esc(d.q));
+  document.getElementById('qtrans').innerHTML = '<b>翻譯：</b>' + fmt(esc(d.t));
+  const box = document.getElementById('opts'); box.innerHTML = '';
+  const order = shuffle(d.opts.map((t,i) => ({t, i})));
+  order.forEach((o, k) => {
+    const b = document.createElement('button');
+    const letter = String.fromCharCode(97+k);
+    b.innerHTML = '<b>' + letter + '.</b> ' + fmt(esc(o.t));
+    b.onclick = () => answer(b, k, o, d);
+    box.appendChild(b);
+  });
+  document.getElementById('qtrans').classList.add('hidden');
+  document.getElementById('transbtn').textContent = '👁 顯示中文';
+  document.getElementById('whybox').classList.add('hidden');
+  document.getElementById('next').classList.add('hidden');
+}
+function answer(btn, k, o, d){
+  if(answerLocked) return;
+  answerLocked = true;
+  const buttons = document.querySelectorAll('#opts button');
+  buttons.forEach(b => b.disabled = true);
+  const isCorrect = o.i === d.ci;
+  if(isCorrect){ btn.classList.add('correct'); correctCnt++; }
+  else{
+    btn.classList.add('wrong');
+    buttons.forEach(b => { if(b.innerHTML.indexOf(fmt(esc(d.opts[d.ci]))) !== -1 && d.opts[d.ci]===o.t) {} });
+    // 標出正確選項
+    buttons.forEach((b, idx) => {
+      if((idx % 1 === 0) && b.dataset && false) {}
+    });
+    // 找出正確選項的按鈕：比對文字
+    buttons.forEach(b => {
+      if(b.textContent.indexOf('↘') !== -1) return;
+    });
+    // 直接重畫標記：對正確文字的按鈕加 correct
+    buttons.forEach(b => {
+      if(b.textContent.slice(3).indexOf(esc(d.opts[d.ci]).replace(/&amp;/g,'&')) !== -1 && b !== btn) b.classList.add('correct');
+    });
+    wrong.push({q: d.q, t: d.t, ans: d.opts[d.ci], why: d.why, ch: d.ch});
+  }
+  document.getElementById('whybox').innerHTML = '<b>' + (isCorrect ? '✔ 正確！' : '✘ 錯誤——正確答案：' + fmt(esc(d.opts[d.ci]))) + '</b><br>' + d.why;
+  document.getElementById('whybox').classList.remove('hidden');
+  document.getElementById('next').classList.remove('hidden');
+  document.getElementById('next').textContent = cur+1 < pool.length ? '下一題 →' : '看結算 📊';
+}
+function nextQ(){
+  cur++;
+  if(cur >= pool.length) showEnd(); else showQ();
+}
+function earlyEnd(){
+  const done = cur + (answerLocked ? 1 : 0);
+  if(done === 0){ backMenu(); return; }
+  early = true; showEnd(done);
+}
+function showEnd(totalGiven){
+  document.getElementById('quiz').classList.add('hidden');
+  document.getElementById('endbox').classList.remove('hidden');
+  const total = totalGiven || pool.length;
+  const pct = Math.round(correctCnt / total * 100);
+  document.getElementById('finalscore').textContent = correctCnt + ' / ' + total + '（' + pct + '%）' + (early ? '　〔提前結算〕' : '');
+  document.getElementById('finalmsg').textContent = pct >= 90 ? '🎉 滿點等級，考試穩了！' : pct >= 70 ? '👍 不錯，把錯題再看一遍就齊了。' : '💪 錯題重做幾輪，直到全對。';
+  const wl = document.getElementById('wronglist'); wl.innerHTML = '';
+  if(wrong.length === 0){ wl.innerHTML = '<p style="color:#047857;font-weight:bold;text-align:center">🎊 這一輪零錯題！</p>'; return; }
+  wrong.forEach(w => {
+    const dv = document.createElement('div'); dv.className = 'wrongitem';
+    dv.innerHTML = '<b>' + fmt(esc(w.q.slice(0, 80))) + '…</b><br><span class="c">✔ 正確答案：' + fmt(esc(w.ans)) + '</span>';
+    wl.appendChild(dv);
+  });
+}
+</script></body></html>
